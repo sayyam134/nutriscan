@@ -212,7 +212,7 @@ class _LoginState extends State<Login> {
                             children: [
                               Image.asset(
                                 'assets/images/google.webp', // Google logo
-                                height: 24, // Adjust the size of the logo
+                                height: 28, // Adjust the size of the logo
                               ),
                               SizedBox(width: 8), // Space between logo and text
                               Text(
