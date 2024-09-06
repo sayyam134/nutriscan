@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "225586104812",
+    "project_id": "nutriscan-9a9ba",
+    "storage_bucket": "nutriscan-9a9ba.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:225586104812:android:a6c86347c5c68cd61f98c9",
+        "android_client_info": {
+          "package_name": "com.ashtaheadline.nutriscan"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "225586104812-kb85s0e0lgcj1a3gimbvtcq359kopmta.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ashtaheadline.nutriscan",
+            "certificate_hash": "40abfd950bec48eb0ef28f7852e44da2016afeec"
+          }
+        },
+        {
+          "client_id": "225586104812-hrhgm6s1bp1m1lt3vm8c6v3v979bj1n3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzrkB_j9aRFafBL7UmS_Hs3gomEjM5BPU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "225586104812-hrhgm6s1bp1m1lt3vm8c6v3v979bj1n3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
