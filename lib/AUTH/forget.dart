@@ -104,21 +104,31 @@ class _ForgetPassState extends State<ForgetPass> {
                 ),
               ),
               SizedBox(
-                height: (MediaQuery.of(context).size.height / 100) * 1,
+                height: (MediaQuery.of(context).size.height / 100) * 4,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("Go back to"),
-                  TextButton(onPressed: ()=> Get.back(),
-                      child: Text("Login",
-                        style: GoogleFonts.poppins(
-                          fontSize: 14, // Font size
-                          color: Color(
-                              0xFF007AFF), // Text color in hexadecimal
-                          fontWeight: FontWeight.w400, // Regular weight
-                        ),
-                      ))
+                  Text("Go back to",
+                      style: GoogleFonts.poppins(
+                        fontSize: 14, // Font size
+                        color: Colors.black, // Text color in hexadecimal
+                        fontWeight: FontWeight.w400, // Regular weight
+                      )),
+                  SizedBox(
+                    width: (MediaQuery.of(context).size.width / 100) * 1,
+                  ),
+                  GestureDetector(
+                    onTap: ()=> Get.back(),
+                    child: Text("Login",
+                      style: GoogleFonts.poppins(
+                        fontSize: 14, // Font size
+                        color: Color(
+                            0xFF007AFF), // Text color in hexadecimal
+                        fontWeight: FontWeight.w400, // Regular weight
+                      ),
+                    ),
+                  )
                 ],
               )
             ],

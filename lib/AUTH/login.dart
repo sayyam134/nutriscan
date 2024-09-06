@@ -38,8 +38,10 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
+    precacheImage(const AssetImage('assets/images/logo.png'), context);
+
     return Scaffold(
-      backgroundColor: Color(0xFFFFF7EE),
+      backgroundColor: const Color(0xFFFFF7EE),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: SingleChildScrollView(
@@ -49,13 +51,13 @@ class _LoginState extends State<Login> {
               SizedBox(
                 height: (MediaQuery.of(context).size.height / 100) * 7.5,
               ),
-              Image.asset(
+               Image.asset(
                 'assets/images/logo.png',
                 height: 244, // Set height to 244 pixels
                 width: 244, // Set width to 244 pixels
                 fit: BoxFit.cover,
               ),
-              SizedBox(
+              const SizedBox(
                 width: double.infinity,
               ),
               Column(
