@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/get_navigation.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:nutriscan/AUTH/forget.dart';
@@ -21,20 +20,79 @@ class _LoginState extends State<Login> {
   bool _obscureText = true;
 
   _login() async {
-    await FirebaseAuth.instance
-        .signInWithEmailAndPassword(email: _email.text, password: _pass.text);
+    if (_validate()) {
+      try {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(email: _email.text, password: _pass.text);
+        Get.snackbar(
+          "Success",
+          "Logged in successfully!",
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+
+      } catch (e) {
+        Get.snackbar(
+          "Error",
+          e.toString(),
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    }
   }
 
-  _google_login() async{
+  _google_login() async {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
     final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
 
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken
+      idToken: googleAuth?.idToken,
     );
 
     await FirebaseAuth.instance.signInWithCredential(credential);
+    Get.snackbar(
+      "Success",
+      "Google sign-in successful!",
+      snackPosition: SnackPosition.BOTTOM,
+      margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+      duration: Duration(seconds: 2),
+      backgroundColor: Colors.green,
+      colorText: Colors.white,
+    );
+  }
+
+  bool _validate() {
+    if (_email.text.isEmpty || !_email.text.contains('@')) {
+      Get.snackbar(
+        "Invalid Email",
+        "Please enter a valid email address",
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+        duration: Duration(seconds: 2),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    } else if (_pass.text.isEmpty || _pass.text.length < 8) {
+      Get.snackbar(
+        "Invalid Password",
+        "Password must be at least 8 characters",
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+        duration: Duration(seconds: 2),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+    return true;
   }
 
   @override
@@ -52,7 +110,7 @@ class _LoginState extends State<Login> {
               SizedBox(
                 height: (MediaQuery.of(context).size.height / 100) * 7.5,
               ),
-               Image.asset(
+              Image.asset(
                 'assets/images/logo.png',
                 height: 244, // Set height to 244 pixels
                 width: 244, // Set width to 244 pixels
@@ -130,13 +188,11 @@ class _LoginState extends State<Login> {
                           icon: Icon(
                             _obscureText
                                 ? Icons.visibility
-                                : Icons
-                                    .visibility_off, // Show or hide password icon
+                                : Icons.visibility_off, // Show or hide password icon
                           ),
                           onPressed: () {
                             setState(() {
-                              _obscureText =
-                                  !_obscureText; // Toggle the obscure text
+                              _obscureText = !_obscureText; // Toggle the obscure text
                             });
                           },
                         ),
@@ -149,18 +205,19 @@ class _LoginState extends State<Login> {
                     ),
                   ),
                   Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                          onPressed: () => Get.to(ForgetPass()),
-                          child: Text(
-                            "Forget Password?",
-                            style: GoogleFonts.poppins(
-                              fontSize: 14, // Font size
-                              color: Color(
-                                  0xFF007AFF), // Text color in hexadecimal
-                              fontWeight: FontWeight.w400, // Regular weight
-                            ),
-                          ))),
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => Get.to(ForgetPass()),
+                      child: Text(
+                        "Forget Password?",
+                        style: GoogleFonts.poppins(
+                          fontSize: 14, // Font size
+                          color: Color(0xFF007AFF), // Text color in hexadecimal
+                          fontWeight: FontWeight.w400, // Regular weight
+                        ),
+                      ),
+                    ),
+                  ),
                   Align(
                     alignment: Alignment.center,
                     child: SizedBox(
@@ -169,11 +226,9 @@ class _LoginState extends State<Login> {
                       child: ElevatedButton(
                         onPressed: _login,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(
-                              0xFF007AFF), // Button background color (007AFF)
+                          backgroundColor: Color(0xFF007AFF), // Button background color (007AFF)
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                8), // Optional: for rounded corners
+                            borderRadius: BorderRadius.circular(8), // Optional: for rounded corners
                           ),
                         ),
                         child: Text(
@@ -198,56 +253,67 @@ class _LoginState extends State<Login> {
                     height: (MediaQuery.of(context).size.height / 100) * 1.5,
                   ),
                   Align(
-                      alignment: Alignment.center,
-                      child: SizedBox(
-                        width: 350, // Set button width
-                        height: 40, // Set button height
-                        child: ElevatedButton(
-                          onPressed: _google_login,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF333333), // Button background color (#333333)
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8), // Optional: for rounded corners
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                'assets/images/google.webp', // Google logo
-                                height: 28, // Adjust the size of the logo
-                              ),
-                              SizedBox(width: 8), // Space between logo and text
-                              Text(
-                                'Sign in with Google',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12, // Font size
-                                  color: Colors.white, // Text color
-                                  fontWeight: FontWeight.w400, // Regular weight
-                                ),
-                              ),
-                            ],
+                    alignment: Alignment.center,
+                    child: SizedBox(
+                      width: 350, // Set button width
+                      height: 40, // Set button height
+                      child: ElevatedButton(
+                        onPressed: _google_login,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF333333), // Button background color (#333333)
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8), // Optional: for rounded corners
                           ),
                         ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              'assets/images/google.webp', // Google logo
+                              height: 28, // Adjust the size of the logo
+                            ),
+                            SizedBox(width: 8), // Space between logo and text
+                            Text(
+                              'Sign in with Google',
+                              style: GoogleFonts.poppins(
+                                fontSize: 12, // Font size
+                                color: Colors.white, // Text color
+                                fontWeight: FontWeight.w400, // Regular weight
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                    ),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Don't have an account?"),
-                      TextButton(onPressed: ()=> Get.to(Signup()),
-                          child: Text("Sign Up Now",
-                            style: GoogleFonts.poppins(
-                              fontSize: 14, // Font size
-                              color: Color(
-                                  0xFF007AFF), // Text color in hexadecimal
-                              fontWeight: FontWeight.w400, // Regular weight
-                            ),
-                          ))
+                      Text(
+                        "Don’t have an account?",
+                        style: GoogleFonts.poppins(
+                          fontSize: 12, // Font size
+                          color: Colors.black, // Text color
+                          fontWeight: FontWeight.w400, // Regular weight
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Get.to(Signup());
+                        },
+                        child: Text(
+                          "Sign up",
+                          style: GoogleFonts.poppins(
+                            fontSize: 12, // Font size
+                            color: Color(0xFF007AFF), // Text color
+                            fontWeight: FontWeight.w400, // Regular weight
+                          ),
+                        ),
+                      ),
                     ],
-                  )
+                  ),
                 ],
-              )
+              ),
             ],
           ),
         ),

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:nutriscan/AUTH/login.dart';
 import 'package:nutriscan/homepage.dart';
 
+import 'email_verify.dart';
+
 class Wrapper extends StatefulWidget {
   const Wrapper({super.key});
 
@@ -18,7 +20,12 @@ class _WrapperState extends State<Wrapper> {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context,snapshot){
           if(snapshot.hasData){
-            return HomePage();
+            if(snapshot.data!.emailVerified){
+              return HomePage();
+            }
+            else{
+              return VerifyEmail();
+            }
           }
           else{
             return Login();
