@@ -5,6 +5,7 @@ import 'package:get/get_navigation/get_navigation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:nutriscan/AUTH/forget.dart';
+import 'package:nutriscan/AUTH/signup.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -234,7 +235,7 @@ class _LoginState extends State<Login> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text("Don't have an account?"),
-                      TextButton(onPressed: null,
+                      TextButton(onPressed: ()=> Get.to(Signup()),
                           child: Text("Sign Up Now",
                             style: GoogleFonts.poppins(
                               fontSize: 14, // Font size
