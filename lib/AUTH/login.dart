@@ -125,7 +125,7 @@ class _LoginState extends State<Login> {
                   Text(
                     "Welcome,",
                     style: GoogleFonts.poppins(
-                      fontSize: 20,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
