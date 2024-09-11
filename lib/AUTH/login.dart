@@ -48,24 +48,30 @@ class _LoginState extends State<Login> {
   }
 
   _google_login() async {
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAuthentication? googleAuth =
+      await googleUser?.authentication;
 
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
-    );
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
 
-    await FirebaseAuth.instance.signInWithCredential(credential);
-    Get.snackbar(
-      "Success",
-      "Google sign-in successful!",
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-      duration: Duration(seconds: 2),
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-    );
+      await FirebaseAuth.instance.signInWithCredential(credential);
+    } catch (e) {
+      // Handle Google sign-in errors
+      print(e.toString());
+      Get.snackbar(
+        'Error',
+        'Google Sign-In failed',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: Duration(seconds: 2),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+      );
+    }
   }
 
   bool _validate() {

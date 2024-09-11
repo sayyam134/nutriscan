@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:nutriscan/AUTH/login.dart';
 import 'package:nutriscan/homepage.dart';
 
+import '../userDetails.dart';
 import 'email_verify.dart';
 
 class Wrapper extends StatefulWidget {
@@ -21,7 +22,7 @@ class _WrapperState extends State<Wrapper> {
         builder: (context,snapshot){
           if(snapshot.hasData){
             if(snapshot.data!.emailVerified){
-              return HomePage();
+              return PersonalizeScreen();
             }
             else{
               return VerifyEmail();

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
@@ -38,7 +39,8 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
     }
 
     try {
-      await FirebaseFirestore.instance.collection('users').add({
+      User? user = FirebaseAuth.instance.currentUser;
+      await FirebaseFirestore.instance.collection('users').doc(user?.uid).update({
         'age': int.parse(_ageController.text),
         'height': double.parse(_heightController.text),
         'weight': double.parse(_weightController.text),
@@ -47,7 +49,7 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
         'isDiabetic': _isDiabetic,
         'isHypertensive': _isHypertensive,
         'acceptTerms': _acceptTerms,
-      });
+  });
 
       _showSnackbar('Success', 'Data saved successfully', Colors.green);
     } catch (e) {

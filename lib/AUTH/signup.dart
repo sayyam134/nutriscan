@@ -116,7 +116,7 @@ class _SignupState extends State<Signup> {
         'name': name,
         'email': email,
       });
-      await Future.delayed(Duration(seconds: 1));
+      //await Future.delayed(Duration(seconds: 1));
       Get.snackbar(
         'Success',
         'Account created successfully!',
