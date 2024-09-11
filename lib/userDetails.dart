@@ -9,7 +9,6 @@ class PersonalizeScreen extends StatefulWidget {
 }
 
 class _PersonalizeScreenState extends State<PersonalizeScreen> {
-  final _formKey = GlobalKey<FormState>();
   String _gender = 'Male';
   String _activityLevel = 'Moderate';
   bool _isDiabetic = false;
@@ -21,50 +20,51 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
 
   // Firestore function to save user data
   Future<void> _saveData() async {
-    if (_formKey.currentState!.validate() && _acceptTerms) {
-      try {
-        await FirebaseFirestore.instance.collection('users').add({
-          'age': int.parse(_ageController.text),
-          'height': double.parse(_heightController.text),
-          'weight': double.parse(_weightController.text),
-          'gender': _gender,
-          'activityLevel': _activityLevel,
-          'isDiabetic': _isDiabetic,
-          'isHypertensive': _isHypertensive,
-          'acceptTerms': _acceptTerms,
-        });
-
-        // Show success message using GetX Snackbar
-        Get.snackbar(
-          'Success',
-          'Data saved successfully!',
-          snackPosition: SnackPosition.BOTTOM,
-          margin: EdgeInsets.all(20),
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
-      } catch (e) {
-        // Show error message using GetX Snackbar
-        Get.snackbar(
-          'Error',
-          'Failed to save data!',
-          snackPosition: SnackPosition.BOTTOM,
-          margin: EdgeInsets.all(20),
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-      }
-    } else {
-      // Show validation error if terms are not accepted
-      Get.snackbar(
-        'Warning',
-        'Please accept the terms and conditions',
-        snackPosition: SnackPosition.BOTTOM,
-        margin: EdgeInsets.all(20),
-        backgroundColor: Colors.orange,
-        colorText: Colors.white,
-      );
+    if (_ageController.text.isEmpty ||
+        _ageController.text=='0' ||
+        _heightController.text.isEmpty ||
+        _heightController.text=='0' ||
+        _weightController.text.isEmpty ||
+        _weightController.text=='0'
+    ) {
+      print(_ageController.text=='0');
+      _showSnackbar('Warning', 'Please fill in all fields Correctly');
+      return;
     }
+
+    if (!_acceptTerms) {
+      _showSnackbar('Warning', 'Please accept the terms and conditions');
+      return;
+    }
+
+    try {
+      await FirebaseFirestore.instance.collection('users').add({
+        'age': int.parse(_ageController.text),
+        'height': double.parse(_heightController.text),
+        'weight': double.parse(_weightController.text),
+        'gender': _gender,
+        'activityLevel': _activityLevel,
+        'isDiabetic': _isDiabetic,
+        'isHypertensive': _isHypertensive,
+        'acceptTerms': _acceptTerms,
+      });
+
+      _showSnackbar('Success', 'Data saved successfully', Colors.green);
+    } catch (e) {
+      _showSnackbar('Error', 'Failed to save data', Colors.red);
+    }
+  }
+
+  // Helper function to show GetX Snackbar
+  void _showSnackbar(String title, String message, [Color backgroundColor = Colors.orange]) {
+    Get.snackbar(
+      title,
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      margin: EdgeInsets.all(20),
+      backgroundColor: backgroundColor,
+      colorText: Colors.white,
+    );
   }
 
   @override
@@ -77,7 +77,7 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: (MediaQuery.of(context).size.height / 100) * 5),
+              SizedBox(height: (MediaQuery.of(context).size.height / 100) * 3),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -88,14 +88,16 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text("Your Experience",
+                  Text(
+                    "Your Experience",
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                    ),)
+                    ),
+                  )
                 ],
               ),
-              SizedBox(height: (MediaQuery.of(context).size.height / 100) * 5),
+              SizedBox(height: (MediaQuery.of(context).size.height / 100) * 3),
               _buildTextField(_ageController, 'Enter Age', TextInputType.number),
               SizedBox(height: (MediaQuery.of(context).size.height / 100) * 3),
               _buildTextField(_heightController, 'Enter Height (cm)', TextInputType.number),
@@ -103,21 +105,21 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
               _buildTextField(_weightController, 'Enter Weight (kg)', TextInputType.number),
               SizedBox(height: (MediaQuery.of(context).size.height / 100) * 3),
               _buildDropdown(
-                  _gender,
-                  ['Male', 'Female', 'Transgender'],
-                  'Choose Gender',
-                  (value){
-                    setState(() {
-                      _gender = value!;
-                    });
-                  },
+                _gender,
+                ['Male', 'Female', 'Transgender'],
+                'Choose Gender',
+                    (value) {
+                  setState(() {
+                    _gender = value!;
+                  });
+                },
               ),
               SizedBox(height: (MediaQuery.of(context).size.height / 100) * 3),
               _buildDropdown(
                 _activityLevel,
                 ['Bed Ridden', 'Sedentary Lifestyle', 'Moderate', 'Heavy'],
                 'Choose Activity Level',
-                    (value){
+                    (value) {
                   setState(() {
                     _activityLevel = value!;
                   });
@@ -125,33 +127,33 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
               ),
               SizedBox(height: (MediaQuery.of(context).size.height / 100) * 3),
               _buildCheckbox(
-                  'Are You Diabetic?',
-                  _isDiabetic,
-                      (value) {
-                    setState(() {
-                      _isDiabetic = value!;
-                    });
-                  }
+                'Are You Diabetic?',
+                _isDiabetic,
+                    (value) {
+                  setState(() {
+                    _isDiabetic = value!;
+                  });
+                },
               ),
               SizedBox(height: (MediaQuery.of(context).size.height / 100) * 3),
               _buildCheckbox(
-                  'Are You Hypertensive?',
-                  _isHypertensive,
-                      (value) {
-                    setState(() {
-                      _isHypertensive = value!;
-                    });
-                  }
+                'Are You Hypertensive?',
+                _isHypertensive,
+                    (value) {
+                  setState(() {
+                    _isHypertensive = value!;
+                  });
+                },
               ),
               SizedBox(height: (MediaQuery.of(context).size.height / 100) * 3),
               _buildCheckbox(
-                  'Accept All Terms & Conditions',
-                  _acceptTerms,
-                      (value) {
-                    setState(() {
-                      _acceptTerms = value!;
-                    });
-                  }
+                'Accept All Terms & Conditions',
+                _acceptTerms,
+                    (value) {
+                  setState(() {
+                    _acceptTerms = value!;
+                  });
+                },
               ),
               SizedBox(height: (MediaQuery.of(context).size.height / 100) * 5),
               Align(
@@ -170,7 +172,10 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
                     child: Text(
                       'Continue',
                       style: GoogleFonts.roboto(
-                          fontSize: 15, color: Colors.white, fontWeight: FontWeight.bold),
+                        fontSize: 15,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -181,6 +186,7 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
       ),
     );
   }
+
   Widget _buildTextField(TextEditingController controller, String hint, TextInputType keyBoard) {
     return SizedBox(
       width: 358,
@@ -202,7 +208,10 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
           ),
         ),
         style: GoogleFonts.roboto(
-            fontSize: 15, color: Colors.black, fontWeight: FontWeight.w400),
+          fontSize: 15,
+          color: Colors.black,
+          fontWeight: FontWeight.w400,
+        ),
       ),
     );
   }
@@ -219,7 +228,10 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
           fillColor: Colors.white,
           hintText: hint,
           hintStyle: GoogleFonts.roboto(
-              fontSize: 15, color: Colors.grey, fontWeight: FontWeight.w400),
+            fontSize: 15,
+            color: Colors.grey,
+            fontWeight: FontWeight.w400,
+          ),
           enabledBorder: OutlineInputBorder(
             borderSide: BorderSide(color: Colors.grey, width: 1),
             borderRadius: BorderRadius.circular(8),
@@ -276,7 +288,7 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
                 value: value,
                 onChanged: onChanged,
                 activeColor: Colors.black, // Color of the checkbox when active
-                checkColor: Colors.white,  // Color of the checkmark
+                checkColor: Colors.white, // Color of the checkmark
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(4),
                 ),
@@ -287,5 +299,4 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
       ),
     );
   }
-
 }
