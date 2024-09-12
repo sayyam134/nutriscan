@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+
+import 'AUTH/wrapper.dart';
 
 class PersonalizeScreen extends StatefulWidget {
   @override
@@ -53,6 +54,7 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
   });
 
       _showSnackbar('Success', 'Data saved successfully', Colors.green);
+      Get.offAll(Wrapper());
     } catch (e) {
       _showSnackbar('Error', 'Failed to save data', Colors.red);
     }
@@ -70,18 +72,9 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
     );
   }
 
-  Future<void> _signout() async {
-    await GoogleSignIn().signOut();
-    await FirebaseAuth.instance.signOut();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: _signout,
-        child: Icon(Icons.logout_outlined),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(

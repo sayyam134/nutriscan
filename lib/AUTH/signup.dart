@@ -52,6 +52,7 @@ class _SignupState extends State<Signup> {
           await FirebaseFirestore.instance.collection('users').doc(user?.uid).set({
             'name': user?.displayName,
             'email': user?.email,
+            'acceptTerms': false,
           });
         }
       } catch (e) {
@@ -135,6 +136,7 @@ class _SignupState extends State<Signup> {
       await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
         'name': name,
         'email': email,
+        'acceptTerms': false,
       });
       //await Future.delayed(Duration(seconds: 1));
       Get.snackbar(

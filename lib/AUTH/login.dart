@@ -67,6 +67,7 @@ class _LoginState extends State<Login> {
           await FirebaseFirestore.instance.collection('users').doc(user?.uid).set({
             'name': user?.displayName,
             'email': user?.email,
+            'acceptTerms': false,
           });
         }
       } catch (e) {
