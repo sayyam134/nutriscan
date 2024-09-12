@@ -37,7 +37,7 @@ class _SignupState extends State<Signup> {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       final GoogleSignInAuthentication? googleAuth =
-          await googleUser?.authentication;
+      await googleUser?.authentication;
 
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth?.accessToken,
@@ -45,6 +45,26 @@ class _SignupState extends State<Signup> {
       );
 
       await FirebaseAuth.instance.signInWithCredential(credential);
+      try {
+        User? user = FirebaseAuth.instance.currentUser;
+        var res = await FirebaseFirestore.instance.collection('users').doc(user?.uid).get();
+        if(!res.exists){
+          await FirebaseFirestore.instance.collection('users').doc(user?.uid).set({
+            'name': user?.displayName,
+            'email': user?.email,
+          });
+        }
+      } catch (e) {
+        Get.snackbar(
+          'Log In Failed',
+          e.toString(),
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+        );
+      }
     } catch (e) {
       // Handle Google sign-in errors
       print(e.toString());
