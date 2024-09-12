@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'AUTH/wrapper.dart';
+import 'wrapper.dart';
 
 class PersonalizeScreen extends StatefulWidget {
   @override

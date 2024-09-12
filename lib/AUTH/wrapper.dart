@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:nutriscan/AUTH/login.dart';
 import 'package:nutriscan/homepage.dart';
 
-import '../userDetails.dart';
+import 'userDetails.dart';
 import 'email_verify.dart';
 
 class Wrapper extends StatefulWidget {
