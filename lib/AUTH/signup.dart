@@ -23,6 +23,7 @@ class _SignupState extends State<Signup> {
 
   bool _obscureText1 = true;
   bool _obscureText2 = true;
+  bool _isLoading = false;
 
   // Regex pattern for password validation
   final RegExp passwordRegExp = RegExp(
@@ -34,10 +35,13 @@ class _SignupState extends State<Signup> {
 
   // Google Sign-In Function
   _google_login() async {
+    setState(() {
+      _isLoading = true;
+    });
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       final GoogleSignInAuthentication? googleAuth =
-      await googleUser?.authentication;
+          await googleUser?.authentication;
 
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth?.accessToken,
@@ -47,14 +51,23 @@ class _SignupState extends State<Signup> {
       await FirebaseAuth.instance.signInWithCredential(credential);
       try {
         User? user = FirebaseAuth.instance.currentUser;
-        var res = await FirebaseFirestore.instance.collection('users').doc(user?.uid).get();
-        if(!res.exists){
-          await FirebaseFirestore.instance.collection('users').doc(user?.uid).set({
+        var res = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user?.uid)
+            .get();
+        if (!res.exists) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user?.uid)
+              .set({
             'name': user?.displayName,
             'email': user?.email,
             'acceptTerms': false,
           });
         }
+        setState(() {
+          _isLoading = false;
+        });
       } catch (e) {
         Get.snackbar(
           'Log In Failed',
@@ -129,16 +142,20 @@ class _SignupState extends State<Signup> {
       );
       return;
     }
-
+    setState(() {
+      _isLoading = true;
+    });
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
-      await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user?.uid)
+          .set({
         'name': name,
         'email': email,
         'acceptTerms': false,
       });
-      //await Future.delayed(Duration(seconds: 1));
       Get.snackbar(
         'Success',
         'Account created successfully!',
@@ -148,9 +165,15 @@ class _SignupState extends State<Signup> {
         colorText: Colors.white,
         margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
       );
-      await Future.delayed(Duration(seconds: 1));
+      setState(() {
+        _isLoading = false;
+      });
+      await Future.delayed(Duration(seconds: 2));
       Get.to(Wrapper());
     } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
       Get.snackbar(
         'Sign Up Failed',
         e.toString(),
@@ -166,52 +189,65 @@ class _SignupState extends State<Signup> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: (MediaQuery.of(context).size.height / 100) * 13),
-              Text(
-                "Let's Sign Up",
-                style: GoogleFonts.poppins(
-                  fontSize: 40,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
+      body: Stack(children: [
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                    height: (MediaQuery.of(context).size.height / 100) * 13),
+                Text(
+                  "Let's Sign Up",
+                  style: GoogleFonts.poppins(
+                    fontSize: 40,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
                 ),
-              ),
-              SizedBox(height: (MediaQuery.of(context).size.height / 100) * 5),
-              _buildTextField(_name, 'Enter Name'),
-              SizedBox(height: (MediaQuery.of(context).size.height / 100) * 3),
-              _buildTextField(_newemail, 'Enter Email'),
-              SizedBox(height: (MediaQuery.of(context).size.height / 100) * 3),
-              _buildPasswordField(_newpass, 'Enter Password', _obscureText1,
-                  () {
-                setState(() {
-                  _obscureText1 = !_obscureText1;
-                });
-              }),
-              SizedBox(height: (MediaQuery.of(context).size.height / 100) * 3),
-              _buildPasswordField(
-                  _newconfirmpass, 'Enter Confirm Password', _obscureText2, () {
-                setState(() {
-                  _obscureText2 = !_obscureText2;
-                });
-              }),
-              SizedBox(height: (MediaQuery.of(context).size.height / 100) * 4),
-              _buildSignupButton(),
-              SizedBox(
-                  height: (MediaQuery.of(context).size.height / 100) * 1.5),
-              const Divider(thickness: 1, color: Colors.black),
-              SizedBox(
-                  height: (MediaQuery.of(context).size.height / 100) * 1.5),
-              _buildGoogleSignInButton(),
-              _buildLoginLink(),
-            ],
+                SizedBox(
+                    height: (MediaQuery.of(context).size.height / 100) * 5),
+                _buildTextField(_name, 'Enter Name'),
+                SizedBox(
+                    height: (MediaQuery.of(context).size.height / 100) * 3),
+                _buildTextField(_newemail, 'Enter Email'),
+                SizedBox(
+                    height: (MediaQuery.of(context).size.height / 100) * 3),
+                _buildPasswordField(_newpass, 'Enter Password', _obscureText1,
+                    () {
+                  setState(() {
+                    _obscureText1 = !_obscureText1;
+                  });
+                }),
+                SizedBox(
+                    height: (MediaQuery.of(context).size.height / 100) * 3),
+                _buildPasswordField(
+                    _newconfirmpass, 'Enter Confirm Password', _obscureText2,
+                    () {
+                  setState(() {
+                    _obscureText2 = !_obscureText2;
+                  });
+                }),
+                SizedBox(
+                    height: (MediaQuery.of(context).size.height / 100) * 4),
+                _buildSignupButton(),
+                SizedBox(
+                    height: (MediaQuery.of(context).size.height / 100) * 1.5),
+                const Divider(thickness: 1, color: Colors.black),
+                SizedBox(
+                    height: (MediaQuery.of(context).size.height / 100) * 1.5),
+                _buildGoogleSignInButton(),
+                _buildLoginLink(),
+              ],
+            ),
           ),
         ),
-      ),
+        if (_isLoading)
+          Center(
+            child: CircularProgressIndicator(),
+          ),
+      ]),
     );
   }
 

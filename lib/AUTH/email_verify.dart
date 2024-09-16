@@ -40,7 +40,7 @@ class _VerifyEmailState extends State<VerifyEmail> {
         'Link Sent',
         'Check your mailbox and verify your Email.',
         snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 4),
+        duration: const Duration(seconds: 3),
         backgroundColor: Colors.green,
         colorText: Colors.white,
         margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
