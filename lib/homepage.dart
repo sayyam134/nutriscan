@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import 'MODEL/calculations.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -13,6 +15,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final Calculations calculations = Calculations();
   String? _userName;
 
   @override
@@ -49,10 +52,21 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: _userName != null
-            ? Text("Hello, $_userName")
-            : CircularProgressIndicator(), // Show loading spinner while fetching data
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+
+          _userName != null
+              ? Text("Hello, $_userName")
+              : CircularProgressIndicator(),
+          SizedBox(width: MediaQuery.of(context).size.width, height: 20,),
+          ElevatedButton(
+              onPressed: () async {
+                await calculations.updateDetails();
+              },
+              child: Text("Calculate"))
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _signout,

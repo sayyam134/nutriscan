@@ -19,11 +19,16 @@ class _LoginState extends State<Login> {
   TextEditingController _pass = TextEditingController();
 
   bool _obscureText = true;
+  bool _isLoading = false; // Add this
 
   _login() async {
     if (_validate()) {
+      setState(() {
+        _isLoading = true; // Start loading
+      });
       try {
-        await FirebaseAuth.instance.signInWithEmailAndPassword(email: _email.text, password: _pass.text);
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+            email: _email.text, password: _pass.text);
         Get.snackbar(
           "Success",
           "Logged in successfully!",
@@ -33,7 +38,6 @@ class _LoginState extends State<Login> {
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
-
       } catch (e) {
         Get.snackbar(
           "Error",
@@ -44,15 +48,21 @@ class _LoginState extends State<Login> {
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
+      } finally {
+        setState(() {
+          _isLoading = false; // Stop loading
+        });
       }
     }
   }
 
   _google_login() async {
+    setState(() {
+      if (mounted) _isLoading = true; // Ensure widget is mounted
+    });
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      final GoogleSignInAuthentication? googleAuth =
-      await googleUser?.authentication;
+      final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
 
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth?.accessToken,
@@ -60,39 +70,33 @@ class _LoginState extends State<Login> {
       );
 
       await FirebaseAuth.instance.signInWithCredential(credential);
-      try {
-        User? user = FirebaseAuth.instance.currentUser;
-        var res = await FirebaseFirestore.instance.collection('users').doc(user?.uid).get();
-        if(!res.exists){
-          await FirebaseFirestore.instance.collection('users').doc(user?.uid).set({
-            'name': user?.displayName,
-            'email': user?.email,
-            'acceptTerms': false,
-          });
-        }
-      } catch (e) {
+      User? user = FirebaseAuth.instance.currentUser;
+      var res = await FirebaseFirestore.instance.collection('users').doc(user?.uid).get();
+      if (!res.exists) {
+        await FirebaseFirestore.instance.collection('users').doc(user?.uid).set({
+          'name': user?.displayName,
+          'email': user?.email,
+          'acceptTerms': false,
+        });
+      }
+    } catch (e) {
+      if (mounted) {
         Get.snackbar(
-          'Log In Failed',
-          e.toString(),
+          'Error',
+          'Google Sign-In failed',
           snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 2),
+          duration: Duration(seconds: 2),
           backgroundColor: Colors.red,
           colorText: Colors.white,
           margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
         );
       }
-    } catch (e) {
-      // Handle Google sign-in errors
-      print(e.toString());
-      Get.snackbar(
-        'Error',
-        'Google Sign-In failed',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: Duration(seconds: 2),
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false; // Stop loading if mounted
+        });
+      }
     }
   }
 
@@ -129,212 +133,221 @@ class _LoginState extends State<Login> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFF7EE),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                height: (MediaQuery.of(context).size.height / 100) * 7.5,
-              ),
-              Image.asset(
-                'assets/images/logo.png',
-                height: 244, // Set height to 244 pixels
-                width: 244, // Set width to 244 pixels
-                fit: BoxFit.cover,
-              ),
-              const SizedBox(
-                width: double.infinity,
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    "Welcome,",
-                    style: GoogleFonts.poppins(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
                   SizedBox(
-                    height: (MediaQuery.of(context).size.height / 100) * 2.5,
+                    height: (MediaQuery.of(context).size.height / 100) * 7.5,
                   ),
-                  SizedBox(
-                    width: 358, // Set width
-                    height: 48, // Set height
-                    child: TextField(
-                      controller: _email,
-                      decoration: InputDecoration(
-                        hintText: 'Email', // Placeholder text
-                        filled: true,
-                        fillColor: Colors.white, // Inner color
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Colors.grey,
-                              width: 1), // Initial border color
-                          borderRadius: BorderRadius.circular(8), // Optional: for rounded corners
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Colors.black, width: 1), // Border on click
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      style: GoogleFonts.roboto(
-                        fontSize: 15, // Font size
-                        color: Colors.black, // Text color
-                        fontWeight: FontWeight.w400, // Regular weight
-                      ),
-                    ),
+                  Image.asset(
+                    'assets/images/logo.png',
+                    height: 244,
+                    width: 244,
+                    fit: BoxFit.cover,
                   ),
-                  SizedBox(
-                    height: (MediaQuery.of(context).size.height / 100) * 1.8,
+                  const SizedBox(
+                    width: double.infinity,
                   ),
-                  SizedBox(
-                    width: 358, // Set width
-                    height: 48, // Set height
-                    child: TextField(
-                      controller: _pass,
-                      obscureText: _obscureText, // Hide or show password
-                      decoration: InputDecoration(
-                        hintText: 'Password', // Placeholder text
-                        filled: true,
-                        fillColor: Colors.white, // Inner color
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Colors.grey,
-                              width: 1), // Initial border color
-                          borderRadius: BorderRadius.circular(8), // Optional rounded corners
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Colors.black, width: 1), // Border on click
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureText
-                                ? Icons.visibility
-                                : Icons.visibility_off, // Show or hide password icon
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscureText = !_obscureText; // Toggle the obscure text
-                            });
-                          },
-                        ),
-                      ),
-                      style: GoogleFonts.roboto(
-                        fontSize: 15, // Font size
-                        color: Colors.black, // Text color
-                        fontWeight: FontWeight.w400, // Regular weight
-                      ),
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () => Get.to(ForgetPass()),
-                      child: Text(
-                        "Forget Password?",
-                        style: GoogleFonts.poppins(
-                          fontSize: 14, // Font size
-                          color: Color(0xFF007AFF), // Text color in hexadecimal
-                          fontWeight: FontWeight.w400, // Regular weight
-                        ),
-                      ),
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: SizedBox(
-                      width: 350, // Set button width
-                      height: 40, // Set button height
-                      child: ElevatedButton(
-                        onPressed: _login,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF007AFF), // Button background color (007AFF)
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8), // Optional: for rounded corners
-                          ),
-                        ),
-                        child: Text(
-                          'Sign in',
-                          style: GoogleFonts.roboto(
-                            fontSize: 15, // Font size
-                            color: Colors.white, // Text color
-                            fontWeight: FontWeight.bold, // Font weight
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: (MediaQuery.of(context).size.height / 100) * 1.5,
-                  ),
-                  const Divider(
-                    thickness: 1,
-                    color: Colors.black,
-                  ),
-                  SizedBox(
-                    height: (MediaQuery.of(context).size.height / 100) * 1.5,
-                  ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: SizedBox(
-                      width: 350, // Set button width
-                      height: 40, // Set button height
-                      child: ElevatedButton(
-                        onPressed: _google_login,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF333333), // Button background color (#333333)
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8), // Optional: for rounded corners
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              'assets/images/google.webp', // Google logo
-                              height: 28, // Adjust the size of the logo
-                            ),
-                            SizedBox(width: 8), // Space between logo and text
-                            Text(
-                              'Sign in with Google',
-                              style: GoogleFonts.poppins(
-                                fontSize: 12, // Font size
-                                color: Colors.white, // Text color
-                                fontWeight: FontWeight.w400, // Regular weight
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Don’t have an account?",
+                        "Welcome,",
                         style: GoogleFonts.poppins(
-                          fontSize: 12, // Font size
-                          color: Colors.black, // Text color
-                          fontWeight: FontWeight.w400, // Regular weight
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      TextButton(
-                        onPressed: () {
-                          Get.to(Signup());
-                        },
-                        child: Text(
-                          "Sign up",
-                          style: GoogleFonts.poppins(
-                            fontSize: 12, // Font size
-                            color: Color(0xFF007AFF), // Text color
-                            fontWeight: FontWeight.w400, // Regular weight
+                      SizedBox(
+                        height: (MediaQuery.of(context).size.height / 100) * 2.5,
+                      ),
+                      SizedBox(
+                        width: 358,
+                        height: 48,
+                        child: TextField(
+                          controller: _email,
+                          decoration: InputDecoration(
+                            hintText: 'Email',
+                            filled: true,
+                            fillColor: Colors.white,
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: Colors.grey,
+                                  width: 1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: Colors.black, width: 1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          style: GoogleFonts.roboto(
+                            fontSize: 15,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: (MediaQuery.of(context).size.height / 100) * 1.8,
+                      ),
+                      SizedBox(
+                        width: 358,
+                        height: 48,
+                        child: TextField(
+                          controller: _pass,
+                          obscureText: _obscureText,
+                          decoration: InputDecoration(
+                            hintText: 'Password',
+                            filled: true,
+                            fillColor: Colors.white,
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: Colors.grey,
+                                  width: 1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: Colors.black, width: 1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureText
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscureText = !_obscureText;
+                                });
+                              },
+                            ),
+                          ),
+                          style: GoogleFonts.roboto(
+                            fontSize: 15,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () => Get.to(ForgetPass()),
+                          child: Text(
+                            "Forget Password?",
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              color: Color(0xFF007AFF),
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.center,
+                        child: SizedBox(
+                          width: 350,
+                          height: 40,
+                          child: ElevatedButton(
+                            onPressed: _login,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFF007AFF),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              'Sign in',
+                              style: GoogleFonts.roboto(
+                                fontSize: 15,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: (MediaQuery.of(context).size.height / 100) * 1.5,
+                      ),
+                      const Divider(
+                        thickness: 1,
+                        color: Colors.black,
+                      ),
+                      SizedBox(
+                        height: (MediaQuery.of(context).size.height / 100) * 1.5,
+                      ),
+                      Align(
+                        alignment: Alignment.center,
+                        child: SizedBox(
+                          width: 350,
+                          height: 40,
+                          child: ElevatedButton(
+                            onPressed: _google_login,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFF333333),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/images/google.webp',
+                                  height: 28,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Sign in with Google',
+                                  style: GoogleFonts.roboto(
+                                    fontSize: 15,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: (MediaQuery.of(context).size.height / 100) * 2,
+                      ),
+                      Align(
+                        alignment: Alignment.center,
+                        child: TextButton(
+                          onPressed: () => Get.to(Signup()),
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Don't have an account? ",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: "Sign up",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xFF007AFF),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -342,10 +355,15 @@ class _LoginState extends State<Login> {
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
+          if (_isLoading) // Show progress indicator if loading
+            Center(
+              child: CircularProgressIndicator(),
+            ),
+        ],
       ),
     );
   }
 }
+

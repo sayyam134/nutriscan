@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:nutriscan/MODEL/calculations.dart';
 import 'wrapper.dart';
 
 class PersonalizeScreen extends StatefulWidget {
@@ -12,8 +12,14 @@ class PersonalizeScreen extends StatefulWidget {
 }
 
 class _PersonalizeScreenState extends State<PersonalizeScreen> {
-  String _gender = 'Male';
-  String _activityLevel = 'Moderate';
+  final Calculations calculations = Calculations();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  String _selectedGender = 'Male';
+  int _gender = 1;
+  String? _selectedActivity = 'Moderate';
+  double? _activityLevel = 1.76;
   bool _isDiabetic = false;
   bool _isHypertensive = false;
   bool _acceptTerms = false;
@@ -21,16 +27,28 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
 
+  final Map<String, double> activityLevels = {
+    'Bed Ridden': 1.2,
+    'Sedentary Lifestyle': 1.53,
+    'Moderate': 1.76,
+    'Heavy': 2.25,
+  };
+
+  final Map<String, int> _genders = {
+    'Male': 1,
+    'Female': 2,
+    'Transgender': 3,
+  };
+
   // Firestore function to save user data
   Future<void> _saveData() async {
     if (_ageController.text.isEmpty ||
-        _ageController.text=='0' ||
+        _ageController.text == '0' ||
         _heightController.text.isEmpty ||
-        _heightController.text=='0' ||
+        _heightController.text == '0' ||
         _weightController.text.isEmpty ||
-        _weightController.text=='0'
-    ) {
-      print(_ageController.text=='0');
+        _weightController.text == '0') {
+      print(_ageController.text == '0');
       _showSnackbar('Warning', 'Please fill in all fields Correctly');
       return;
     }
@@ -41,8 +59,8 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
     }
 
     try {
-      User? user = FirebaseAuth.instance.currentUser;
-      await FirebaseFirestore.instance.collection('users').doc(user?.uid).update({
+      User? user = _auth.currentUser;
+      await _firestore.collection('users').doc(user?.uid).update({
         'age': int.parse(_ageController.text),
         'height': double.parse(_heightController.text),
         'weight': double.parse(_weightController.text),
@@ -51,17 +69,18 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
         'isDiabetic': _isDiabetic,
         'isHypertensive': _isHypertensive,
         'acceptTerms': _acceptTerms,
-  });
-
+      });
       _showSnackbar('Success', 'Data saved successfully', Colors.green);
-      Get.offAll(Wrapper());
+      Get.offAll(() => Wrapper());
     } catch (e) {
-      _showSnackbar('Error', 'Failed to save data', Colors.red);
+      print(e.toString());
+      _showSnackbar('Error','Failed to save data', Colors.red);
     }
   }
 
   // Helper function to show GetX Snackbar
-  void _showSnackbar(String title, String message, [Color backgroundColor = Colors.orange]) {
+  void _showSnackbar(String title, String message,
+      [Color backgroundColor = Colors.orange]) {
     Get.snackbar(
       title,
       message,
@@ -103,30 +122,35 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
                 ],
               ),
               SizedBox(height: (MediaQuery.of(context).size.height / 100) * 3),
-              _buildTextField(_ageController, 'Enter Age', TextInputType.number),
+              _buildTextField(
+                  _ageController, 'Enter Age', TextInputType.number),
               SizedBox(height: (MediaQuery.of(context).size.height / 100) * 3),
-              _buildTextField(_heightController, 'Enter Height (cm)', TextInputType.number),
+              _buildTextField(
+                  _heightController, 'Enter Height (cm)', TextInputType.number),
               SizedBox(height: (MediaQuery.of(context).size.height / 100) * 3),
-              _buildTextField(_weightController, 'Enter Weight (kg)', TextInputType.number),
+              _buildTextField(
+                  _weightController, 'Enter Weight (kg)', TextInputType.number),
               SizedBox(height: (MediaQuery.of(context).size.height / 100) * 3),
               _buildDropdown(
-                _gender,
-                ['Male', 'Female', 'Transgender'],
+                _selectedGender,
+                _genders.keys.toList(),
                 'Choose Gender',
-                    (value) {
+                (value) {
                   setState(() {
-                    _gender = value!;
+                    _selectedGender = value!;
+                    _gender = _genders[value]!;
                   });
                 },
               ),
               SizedBox(height: (MediaQuery.of(context).size.height / 100) * 3),
               _buildDropdown(
-                _activityLevel,
-                ['Bed Ridden', 'Sedentary Lifestyle', 'Moderate', 'Heavy'],
+                _selectedActivity,
+                activityLevels.keys.toList(),
                 'Choose Activity Level',
-                    (value) {
+                (value) {
                   setState(() {
-                    _activityLevel = value!;
+                    _selectedActivity = value!;
+                    _activityLevel = activityLevels[value]!;
                   });
                 },
               ),
@@ -134,7 +158,7 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
               _buildCheckbox(
                 'Are You Diabetic?',
                 _isDiabetic,
-                    (value) {
+                (value) {
                   setState(() {
                     _isDiabetic = value!;
                   });
@@ -144,7 +168,7 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
               _buildCheckbox(
                 'Are You Hypertensive?',
                 _isHypertensive,
-                    (value) {
+                (value) {
                   setState(() {
                     _isHypertensive = value!;
                   });
@@ -154,13 +178,13 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
               _buildCheckbox(
                 'Accept All Terms & Conditions',
                 _acceptTerms,
-                    (value) {
+                (value) {
                   setState(() {
                     _acceptTerms = value!;
                   });
                 },
               ),
-              SizedBox(height: (MediaQuery.of(context).size.height / 100) * 5),
+              SizedBox(height: (MediaQuery.of(context).size.height / 100) * 3),
               Align(
                 alignment: Alignment.center,
                 child: SizedBox(
@@ -192,7 +216,8 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String hint, TextInputType keyBoard) {
+  Widget _buildTextField(
+      TextEditingController controller, String hint, TextInputType keyBoard) {
     return SizedBox(
       width: 358,
       height: 48,
@@ -221,7 +246,8 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
     );
   }
 
-  Widget _buildDropdown<T>(T value, List<T> items, String hint, ValueChanged<T?> onChanged) {
+  Widget _buildDropdown<T>(
+      T value, List<T> items, String hint, ValueChanged<T?> onChanged) {
     return SizedBox(
       width: 358,
       height: 48,
@@ -263,13 +289,15 @@ class _PersonalizeScreenState extends State<PersonalizeScreen> {
     );
   }
 
-  Widget _buildCheckbox(String label, bool value, ValueChanged<bool?> onChanged) {
+  Widget _buildCheckbox(
+      String label, bool value, ValueChanged<bool?> onChanged) {
     return SizedBox(
       width: 358,
       height: 48,
       child: InkWell(
         onTap: () {
-          onChanged(!value); // Tapping on the entire container toggles the checkbox
+          onChanged(
+              !value); // Tapping on the entire container toggles the checkbox
         },
         child: Container(
           decoration: BoxDecoration(
