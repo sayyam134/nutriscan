@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:nutriscan/AUTH/wrapper.dart';
 import 'MEAL/mealWrapper.dart';
+import 'PROFILE/show_details.dart';
 import 'SCAN/scan_products_page.dart';
-import 'PROFILE/profile_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -31,7 +32,9 @@ class _HomePageState extends State<HomePage> {
           ? Mealwrapper(userId: userId!)
           : Center(child: Text('Error: User not logged in')), // Handle null case
       ScanProductsPage(),
-      ProfilePage(),
+      userId != null
+          ? UserDetailsPage(userId: userId!)
+          : Center(child: Text('Error: User not logged in')),
     ];
   }
 
@@ -40,9 +43,11 @@ class _HomePageState extends State<HomePage> {
       await GoogleSignIn().signOut();
       await FirebaseAuth.instance.signOut();
 
+      Get.offAll(() => Wrapper());
+
       // Show success message with GetX Snackbar
       Get.snackbar(
-        'Success',
+        'See you soon',
         'You have successfully logged out.',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green,
@@ -85,10 +90,8 @@ class _HomePageState extends State<HomePage> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.settings),
-            onPressed: () {
-              // Add settings action here
-            },
+            icon: Icon(Icons.logout_outlined),
+            onPressed: _signout,
           ),
         ],
       ),
@@ -110,10 +113,6 @@ class _HomePageState extends State<HomePage> {
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _signout,
-        child: const Icon(Icons.logout_outlined),
       ),
     );
   }

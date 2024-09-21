@@ -62,7 +62,7 @@ class Calculations {
       _fats = (0.2 * _totalCal) * 0.129598;
 
       _sugar = _isdiabetic ? 5 : 50;
-      _sodium = _isHypertensive ? 999 : 2;
+      _sodium = _isHypertensive ? 999 : 2000;
 
       print("Total calories : ${_totalCal.round()} kcal");
       print("Total carbs : ${_carbs.round()} g");

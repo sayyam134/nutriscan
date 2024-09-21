@@ -8,6 +8,8 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'reminder_controller.dart'; // Import your controller
 import '../homepage.dart';
+import 'package:lottie/lottie.dart';
+
 
 class MealPlannerPage extends StatefulWidget {
   @override
@@ -82,7 +84,10 @@ class _MealPlannerPageState extends State<MealPlannerPage> {
               future: fetchMealPlan(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return Center(
+                    child: SizedBox(
+                      height: screenHeight*0.4,
+                      child: Lottie.asset('assets/animation/meal.json')),);
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -207,7 +212,10 @@ class _MealPlannerPageState extends State<MealPlannerPage> {
                                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                               crossAxisAlignment: CrossAxisAlignment.end,
                                               children: [
-                                                Text('State: ${meal['State']}', style: GoogleFonts.poppins(color: Colors.grey[800], fontWeight: FontWeight.w600)),
+                                                Text(
+                                                  'State: ${meal['State'].length > 10 ? meal['State'].substring(0, 10) + '...' : meal['State']}',
+                                                  style: GoogleFonts.poppins(color: Colors.grey[800], fontWeight: FontWeight.w600),
+                                                ),
                                                 Text('Type: ${meal['Type']}', style: GoogleFonts.poppins(color: Colors.grey[800], fontWeight: FontWeight.w600)),
                                                 SizedBox(height: screenHeight * 0.01),
                                                 GestureDetector(
