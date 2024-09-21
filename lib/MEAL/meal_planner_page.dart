@@ -213,7 +213,7 @@ class _MealPlannerPageState extends State<MealPlannerPage> {
                                                 GestureDetector(
                                                   onTap: () async {
                                                     final foodName = meal['Food Name'];
-                                                    final query = Uri.encodeComponent('How+to+make+$foodName');
+                                                    final query = Uri.encodeComponent('How to make $foodName');
                                                     final url = Uri.parse('https://www.youtube.com/results?search_query=$query');
 
                                                     if (await canLaunchUrl(url)) {
