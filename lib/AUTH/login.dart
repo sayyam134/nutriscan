@@ -77,6 +77,7 @@ class _LoginState extends State<Login> {
           'name': user?.displayName,
           'email': user?.email,
           'acceptTerms': false,
+          'hasPro' : false,
         });
       }
     } catch (e) {

@@ -63,6 +63,7 @@ class _SignupState extends State<Signup> {
             'name': user?.displayName,
             'email': user?.email,
             'acceptTerms': false,
+            'hasPro' : false,
           });
         }
         setState(() {
@@ -155,6 +156,7 @@ class _SignupState extends State<Signup> {
         'name': name,
         'email': email,
         'acceptTerms': false,
+        'hasPro' : false,
       });
       Get.snackbar(
         'Success',

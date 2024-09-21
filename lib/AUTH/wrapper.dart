@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:nutriscan/AUTH/login.dart';
 import 'package:nutriscan/homepage.dart';
 
+import '../MODEL/calculations.dart';
 import 'userDetails.dart';
 import 'email_verify.dart';
 
@@ -52,6 +53,8 @@ class _WrapperState extends State<Wrapper> {
                   } else if (futureSnapshot.hasData) {
                     // If _acceptTerm is true, go to HomePage, else go to PersonalizeScreen
                     if (futureSnapshot.data == true) {
+                      Calculations c =Calculations();
+                      c.updateDetails();
                       return HomePage();
                     } else {
                       return PersonalizeScreen();
