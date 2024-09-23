@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _isReminderOn = prefs.getBool('waterReminder') ?? false;
       if (_isReminderOn) {
-        _scheduleReminders(false);
+        _scheduleReminders();
       }
     });
   }
@@ -66,7 +66,7 @@ class _HomePageState extends State<HomePage> {
     await prefs.setBool('waterReminder', isActive);
   }
 
-  Future<void> _scheduleReminders(bool _show) async {
+  Future<void> _scheduleReminders() async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
     AndroidNotificationDetails(
       'hydration_channel',
@@ -90,17 +90,6 @@ class _HomePageState extends State<HomePage> {
         uiLocalNotificationDateInterpretation:
         UILocalNotificationDateInterpretation.wallClockTime,
         matchDateTimeComponents: DateTimeComponents.time,
-      );
-    }
-    if(_show){
-      Get.snackbar(
-        'Reminder Set',
-        'Hourly water reminders are now active!',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(20),
-        duration: const Duration(seconds: 3),
       );
     }
   }
@@ -169,9 +158,18 @@ class _HomePageState extends State<HomePage> {
                     _isReminderOn = value;
                   });
                   if (_isReminderOn) {
-                    _scheduleReminders(true);
+                    _scheduleReminders();
                     _instantNotification();
                     _saveReminderState(true);
+                    Get.snackbar(
+                      'Reminder Set',
+                      'Hourly water reminders are now active!',
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.green,
+                      colorText: Colors.white,
+                      margin: const EdgeInsets.all(20),
+                      duration: const Duration(seconds: 3),
+                    );
                   } else {
                     _cancelReminders();
                   }
