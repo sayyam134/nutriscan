@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage> {
       userId != null
           ? Mealwrapper(userId: userId!)
           : const Center(child: Text('Error: User not logged in')),
-      ScanProductsPage(),
+      BarcodeScanPage(userId: userId!),
       userId != null
           ? UserDetailsPage(userId: userId!)
           : const Center(child: Text('Error: User not logged in')),
