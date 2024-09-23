@@ -39,6 +39,11 @@ dependencies:
   lottie: ^3.1.2
   http: ^1.2.2
   url_launcher: ^6.3.0
+  flutter_local_notifications: ^14.0.0
+  timezone: ^0.9.4
+  permission_handler: ^10.4.3
+  animated_toggle_switch: ^0.8.3
+  shared_preferences: ^2.0.10
 
 
   # The following adds the Cupertino Icons font to your application.

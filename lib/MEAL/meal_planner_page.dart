@@ -2,13 +2,16 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
+import '../ALERTS/noti.dart';
 import 'reminder_controller.dart'; // Import your controller
 import '../homepage.dart';
 import 'package:lottie/lottie.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 
 class MealPlannerPage extends StatefulWidget {
@@ -19,7 +22,7 @@ class MealPlannerPage extends StatefulWidget {
 class _MealPlannerPageState extends State<MealPlannerPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final ReminderController reminderController = Get.put(ReminderController()); // Initialize the controller
+  final ReminderController reminderController = Get.put(ReminderController());// Initialize the controller
 
   int cal = 0;
   int carbs = 0;
@@ -29,10 +32,13 @@ class _MealPlannerPageState extends State<MealPlannerPage> {
   String loc = 'Madhya Pradesh';
   String deitPref = "veg";
 
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
   @override
   void initState() {
     super.initState();
     _fetchUserDetails();
+    NotificationService().initNotification();
   }
 
   Future<void> _fetchUserDetails() async {
@@ -137,7 +143,21 @@ class _MealPlannerPageState extends State<MealPlannerPage> {
                                   ),
                                   Obx(() => GestureDetector(
                                     onTap: () {
-                                      reminderController.toggleReminder(); // Toggle reminder state
+                                      reminderController.toggleReminder(dayIndex); // Toggle reminder state
+                                      if (reminderController.reminderStates[dayIndex].value) {
+                                        NotificationService().showInstantMealNotification(dayIndex);
+                                        Get.snackbar(
+                                          'Reminder',
+                                          'Meals Reminder Activated',
+                                          snackPosition: SnackPosition.BOTTOM,
+                                          duration: Duration(seconds: 2),
+                                          backgroundColor: Colors.green,
+                                          margin: EdgeInsets.all(20),
+                                          colorText: Colors.white,
+                                        );
+                                        NotificationService().scheduleMealReminders(dayIndex);
+                                        // Schedule reminders here
+                                      }
                                     },
                                     child: Container(
                                       decoration: BoxDecoration(
@@ -151,12 +171,12 @@ class _MealPlannerPageState extends State<MealPlannerPage> {
                                       child: Row(
                                         children: [
                                           Icon(
-                                            reminderController.reminderAdded.value ? Icons.check : Icons.notifications,
+                                            reminderController.reminderStates[dayIndex].value ? Icons.check : Icons.notifications,
                                             color: Colors.black,
                                           ),
                                           SizedBox(width: 5),
                                           Text(
-                                            reminderController.reminderAdded.value ? 'Reminder Added' : 'Add to Reminders',
+                                            reminderController.reminderStates[dayIndex].value ? 'Reminder Added' : 'Add to Reminders',
                                             style: GoogleFonts.poppins(
                                               color: Colors.black,
                                               fontWeight: FontWeight.w600,
@@ -264,6 +284,7 @@ class _MealPlannerPageState extends State<MealPlannerPage> {
                                 ),
                               );
                             }),
+                            // Total Nutrients Section
                             Container(
                               width: double.infinity,
                               decoration: BoxDecoration(
