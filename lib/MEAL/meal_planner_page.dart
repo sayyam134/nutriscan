@@ -11,7 +11,6 @@ import '../ALERTS/noti.dart';
 import 'reminder_controller.dart'; // Import your controller
 import '../homepage.dart';
 import 'package:lottie/lottie.dart';
-import 'package:timezone/timezone.dart' as tz;
 
 
 class MealPlannerPage extends StatefulWidget {
